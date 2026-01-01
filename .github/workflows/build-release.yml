@@ -1,0 +1,67 @@
+name: Build and Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '10.0.x' 
+        dotnet-quality: 'preview'
+
+    - name: Restore dependencies
+      run: dotnet restore LightSteamAccountSwitcher.slnx
+
+    - name: Build
+      run: dotnet build LightSteamAccountSwitcher.slnx --configuration Release --no-restore
+
+    - name: Publish
+      run: |
+        dotnet publish src/LightSteamAccountSwitcher/LightSteamAccountSwitcher.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -o ./publish
+
+    - name: Generate Changelog
+      id: changelog
+      shell: bash
+      run: |
+        # Get the previous tag
+        PREV_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")
+        
+        if [ -z "$PREV_TAG" ]; then
+          echo "No previous tag found. Summarizing all commits."
+          SUMMARY=$(git log --pretty=format:"- %s (%h)" --no-merges)
+        else
+          echo "Summarizing commits since $PREV_TAG"
+          SUMMARY=$(git log $PREV_TAG..HEAD --pretty=format:"- %s (%h)" --no-merges)
+        fi
+        
+        {
+          echo "summary<<EOF"
+          echo "$SUMMARY"
+          echo "EOF"
+        } >> "$GITHUB_OUTPUT"
+
+    - name: Create Release
+      uses: softprops/action-gh-release@v1
+      with:
+        files: |
+          ./publish/LightSteamAccountSwitcher.exe
+          ./publish/*.dll
+          ./publish/*.json
+        body: |
+          ## Changes
+          ${{ steps.changelog.outputs.summary }}
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
