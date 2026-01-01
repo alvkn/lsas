@@ -12,6 +12,9 @@
         <SelfContained>false</SelfContained>
         <PublishReadyToRun>true</PublishReadyToRun>
         <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
+        <ApplicationIcon>Assets\LSAS.ico</ApplicationIcon>
+        <AssemblyVersion>1.0.0.0</AssemblyVersion>
+        <FileVersion>1.0.0.0</FileVersion>
     </PropertyGroup>
 
     <ItemGroup>
@@ -22,6 +25,11 @@
 
     <ItemGroup>
         <PackageReference Include="CommunityToolkit.Mvvm" Version="8.2.2"/>
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Remove="Assets\LSAS.ico" />
+      <Resource Include="Assets\LSAS.ico" />
     </ItemGroup>
 
 </Project>
