@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <OutputType>WinExe</OutputType>
+        <TargetFramework>net10.0-windows</TargetFramework>
+        <Nullable>enable</Nullable>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <UseWPF>true</UseWPF>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\LightSteamAccountSwitcher.Core\LightSteamAccountSwitcher.Core.csproj"/>
+        <ProjectReference Include="..\LightSteamAccountSwitcher.Steam\LightSteamAccountSwitcher.Steam.csproj"/>
+        <ProjectReference Include="..\LightSteamAccountSwitcher.Windows\LightSteamAccountSwitcher.Windows.csproj"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="CommunityToolkit.Mvvm" Version="8.2.2"/>
+    </ItemGroup>
+
+</Project>
