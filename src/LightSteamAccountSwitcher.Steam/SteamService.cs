@@ -1,5 +1,6 @@
 using System.IO;
 using System.Net.Http;
+using System.Text;
 using System.Xml.Linq;
 using Gameloop.Vdf;
 using Gameloop.Vdf.Linq;
@@ -55,8 +56,6 @@ public class SteamService
         }
 
         var accounts = new List<SteamAccount>();
-        var vacsCache = _vacCache.LoadCache();
-
         try
         {
             var vdfText = File.ReadAllText(path);
@@ -69,7 +68,7 @@ public class SteamService
 
             foreach (var userNode in usersNode)
             {
-                var account = CreateSteamAccountFromVdf(userNode, vacsCache);
+                var account = CreateSteamAccountFromVdf(userNode);
                 if (account != null)
                 {
                     accounts.Add(account);
@@ -84,9 +83,7 @@ public class SteamService
         return accounts;
     }
 
-    private static SteamAccount? CreateSteamAccountFromVdf(
-        KeyValuePair<string, VToken> userNode,
-        IReadOnlyCollection<SteamProfile> vacsCache)
+    private SteamAccount? CreateSteamAccountFromVdf(KeyValuePair<string, VToken> userNode)
     {
         var steamId64 = userNode.Key;
         if (userNode.Value is not VObject userDetails)
@@ -110,7 +107,7 @@ public class SteamService
         var lastLogin = DateTimeOffset.FromUnixTimeSeconds(ts).LocalDateTime;
 
         // Cache lookup
-        var cachedProfile = vacsCache.FirstOrDefault(x => x.SteamId64 == steamId64);
+        var cachedProfile = _vacCache.Get(steamId64);
         var cachedAvatar = ImageCache.GetCachedAvatarPath(steamId64);
 
         var account = new SteamAccount
@@ -144,11 +141,7 @@ public class SteamService
             return;
         }
 
-        // Check TTL
-        var cachedProfile = _vacCache.LoadCache().FirstOrDefault(x => x.SteamId64 == account.SteamId64);
-        var vacCacheValid =
-            cachedProfile != null &&
-            DateTime.Now - cachedProfile.LastUpdated < TimeSpan.FromDays(1); // TODO: move to VacStatusCache
+        var vacCacheValid = _vacCache.IsCacheValid(account.SteamId64);
         var imageCacheValid = ImageCache.IsCacheValid(account.SteamId64);
 
         if (vacCacheValid && imageCacheValid)
@@ -184,7 +177,7 @@ public class SteamService
             var isLimit = isLimited == "1";
 
             // Update VAC Cache (this also sets LastUpdated)
-            _vacCache.UpdateCache(account.SteamId64, isVac, isLimit);
+            _vacCache.Update(account.SteamId64, isVac, isLimit);
 
             account.IsVacBanned = isVac;
             account.IsLimited = isLimit;
@@ -306,6 +299,11 @@ public class SteamService
     {
         try
         {
+            if (string.IsNullOrEmpty(steamId64))
+            {
+                return;
+            }
+
             var id32 = new SteamId(steamId64).Id32;
             var steamPath = SteamRegistryHelper.GetSteamPath();
             if (string.IsNullOrEmpty(steamPath))
@@ -313,44 +311,48 @@ public class SteamService
                 return;
             }
 
+            steamPath = steamPath.Replace('/', Path.DirectorySeparatorChar);
             var localConfigPath = Path.Combine(steamPath, "userdata", id32, "config", "localconfig.vdf");
             if (!File.Exists(localConfigPath))
             {
                 return;
             }
 
-            var vdfText = File.ReadAllText(localConfigPath);
-            var root = VdfConvert.Deserialize(vdfText);
+            var localConfigText = File.ReadAllText(localConfigPath);
 
-            if (root.Value is not VObject rootObj)
+            var positionOfVar = localConfigText.IndexOf("\"ePersonaState\"", StringComparison.Ordinal);
+            if (positionOfVar == -1)
             {
                 return;
             }
 
-            VObject? friendsObj = null;
-            if (rootObj.TryGetValue("friends", out var f) && f is VObject fObj)
-            {
-                friendsObj = fObj;
-            }
-            else if (rootObj.TryGetValue("UserLocalConfigStore", out var s) && s is VObject sObj)
-            {
-                if (sObj.TryGetValue("friends", out var f2) && f2 is VObject f2Obj)
-                {
-                    friendsObj = f2Obj;
-                }
-            }
-
-            if (friendsObj == null)
+            var valStartQuote = localConfigText.IndexOf('"', positionOfVar + 15);
+            if (valStartQuote == -1)
             {
                 return;
             }
 
-            friendsObj["ePersonaState"] = new VValue(state.ToString());
-            File.WriteAllText(localConfigPath, root.ToString());
+            var valEndQuote = localConfigText.IndexOf('"', valStartQuote + 1);
+            if (valEndQuote == -1)
+            {
+                return;
+            }
+
+            var sb = new StringBuilder(localConfigText);
+            sb.Remove(valStartQuote + 1, valEndQuote - valStartQuote - 1);
+            sb.Insert(valStartQuote + 1, state);
+
+            File.WriteAllText(localConfigPath, sb.ToString());
         }
         catch (Exception ex)
         {
             Console.WriteLine($"Error setting persona state: {ex.Message}");
         }
+    }
+
+    public void ClearCache()
+    {
+        _imageCache.ClearCache();
+        _vacCache.ClearCache();
     }
 }

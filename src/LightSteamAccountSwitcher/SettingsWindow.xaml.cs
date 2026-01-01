@@ -4,31 +4,22 @@ using LightSteamAccountSwitcher.ViewModels;
 
 namespace LightSteamAccountSwitcher;
 
-public partial class MainWindow : Window
+public partial class SettingsWindow : Window
 {
-    public MainWindow()
+    public SettingsWindow(SettingsViewModel viewModel)
     {
         InitializeComponent();
-        var viewModel = new MainWindowViewModel();
         DataContext = viewModel;
-        Loaded += async (s, e) => await viewModel.LoadAccounts();
     }
 
     private void Header_MouseDown(object sender, MouseButtonEventArgs e)
     {
         if (e.ChangedButton == MouseButton.Left)
-        {
-            DragMove();
-        }
+            this.DragMove();
     }
 
     private void Close_Click(object sender, RoutedEventArgs e)
     {
         Close();
-    }
-
-    private void Minimize_Click(object sender, RoutedEventArgs e)
-    {
-        WindowState = WindowState.Minimized;
     }
 }

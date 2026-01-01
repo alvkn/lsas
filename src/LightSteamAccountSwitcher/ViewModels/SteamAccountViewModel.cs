@@ -1,3 +1,6 @@
+using System.IO;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
 using CommunityToolkit.Mvvm.ComponentModel;
 using LightSteamAccountSwitcher.Core.Models;
 
@@ -20,7 +23,10 @@ public partial class SteamAccountViewModel : ObservableObject
     public bool WantsOfflineMode => Model.WantsOfflineMode;
 
     [ObservableProperty]
-    private string _avatarUrl;
+    private string? _avatarUrl;
+
+    [ObservableProperty]
+    private ImageSource? _avatarSource;
 
     [ObservableProperty]
     private bool _isVacBanned;
@@ -34,9 +40,43 @@ public partial class SteamAccountViewModel : ObservableObject
     public void RefreshFromModel()
     {
         AvatarUrl = Model.AvatarUrl;
+        AvatarSource = LoadImage(Model.AvatarUrl);
         IsVacBanned = Model.IsVacBanned;
         IsLimited = Model.IsLimited;
         OnPropertyChanged(nameof(AccountName));
         OnPropertyChanged(nameof(PersonaName));
+    }
+
+    private static ImageSource? LoadImage(string path)
+    {
+        if (string.IsNullOrEmpty(path))
+        {
+            return null;
+        }
+
+        try
+        {
+            if (path.StartsWith("http", StringComparison.OrdinalIgnoreCase))
+            {
+                return new BitmapImage(new Uri(path));
+            }
+
+            if (File.Exists(path))
+            {
+                var bitmap = new BitmapImage();
+                bitmap.BeginInit();
+                bitmap.CacheOption = BitmapCacheOption.OnLoad;
+                bitmap.UriSource = new Uri(path);
+                bitmap.EndInit();
+                bitmap.Freeze();
+                return bitmap;
+            }
+        }
+        catch
+        {
+            // Ignore errors
+        }
+
+        return null;
     }
 }

@@ -4,6 +4,7 @@ using System.IO;
 using System.Windows;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using LightSteamAccountSwitcher.Core.Services;
 using LightSteamAccountSwitcher.Steam;
 using LightSteamAccountSwitcher.Windows;
 
@@ -70,6 +71,23 @@ public partial class MainWindowViewModel : ObservableObject
     }
 
     [RelayCommand]
+    private void OpenAbout()
+    {
+        var aboutWindow = new AboutWindow();
+        aboutWindow.Owner = Application.Current.MainWindow;
+        aboutWindow.ShowDialog();
+    }
+
+    [RelayCommand]
+    private void OpenSettings()
+    {
+        var settingsViewModel = new SettingsViewModel(_steamService);
+        var settingsWindow = new SettingsWindow(settingsViewModel);
+        settingsWindow.Owner = Application.Current.MainWindow;
+        settingsWindow.ShowDialog();
+    }
+
+    [RelayCommand]
     private async Task SwitchAccount(SteamAccountViewModel accountVm)
     {
         await SwitchWithState(accountVm, 1);
@@ -109,6 +127,11 @@ public partial class MainWindowViewModel : ObservableObject
             StatusMessage = $"Switched to {accountVm.AccountName}.";
             Accounts.FirstOrDefault(acc => acc.IsActive)?.IsActive = false;
             accountVm.IsActive = true;
+
+            if (SettingsService.Settings.AutoClose)
+            {
+                Application.Current.Shutdown();
+            }
         }
         catch (Exception ex)
         {
@@ -163,10 +186,15 @@ public partial class MainWindowViewModel : ObservableObject
 
         try
         {
-            var steamPath = SteamRegistryHelper.GetSteamPath();
+            var steamPath = SettingsService.Settings.SteamPath;
             if (string.IsNullOrEmpty(steamPath))
             {
-                StatusMessage = "Steam path not found in registry.";
+                steamPath = SteamRegistryHelper.GetSteamPath();
+            }
+
+            if (string.IsNullOrEmpty(steamPath))
+            {
+                StatusMessage = "Steam path not found.";
                 return;
             }
 
@@ -201,16 +229,34 @@ public partial class MainWindowViewModel : ObservableObject
 
         try
         {
-            var exePath = Process.GetCurrentProcess().MainModule!.FileName;
+            var exePath = Environment.ProcessPath;
             var desktop = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
             var shortcutPath = Path.Combine(desktop, $"Switch to {accountVm.AccountName}.lnk");
-            var iconPath = SteamService.GetCachedIconPath(accountVm.Model.SteamId64); // TODO
 
-            ShortcutHelper.CreateShortcut(shortcutPath,
-                exePath,
+            var iconPath = SteamService.GetCachedIconPath(accountVm.Model.SteamId64);
+            if (iconPath == null)
+            {
+                // Try to create icon from avatar
+                var avatarPath = Path.Combine(AppDataHelper.GetCachePath("Avatars"),
+                    $"{accountVm.Model.SteamId64}.jpg");
+                if (File.Exists(avatarPath))
+                {
+                    var newIconPath = Path.ChangeExtension(avatarPath, ".ico");
+                    IconHelper.CreateIconFromImage(avatarPath, newIconPath);
+                    if (File.Exists(newIconPath))
+                    {
+                        iconPath = newIconPath;
+                    }
+                }
+            }
+
+            ShortcutHelper.CreateShortcut(
+                shortcutPath,
+                exePath!,
                 $"--switch {accountVm.Model.SteamId64}",
                 $"Switch to {accountVm.AccountName}",
-                iconPath);
+                iconPath ?? "");
+
             StatusMessage = "Shortcut created on Desktop.";
         }
         catch (Exception ex)

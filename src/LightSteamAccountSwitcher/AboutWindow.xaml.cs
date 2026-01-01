@@ -1,17 +1,15 @@
+using System.Diagnostics;
 using System.Windows;
 using System.Windows.Input;
-using LightSteamAccountSwitcher.ViewModels;
+using System.Windows.Navigation;
 
 namespace LightSteamAccountSwitcher;
 
-public partial class MainWindow : Window
+public partial class AboutWindow : Window
 {
-    public MainWindow()
+    public AboutWindow()
     {
         InitializeComponent();
-        var viewModel = new MainWindowViewModel();
-        DataContext = viewModel;
-        Loaded += async (s, e) => await viewModel.LoadAccounts();
     }
 
     private void Header_MouseDown(object sender, MouseButtonEventArgs e)
@@ -27,8 +25,9 @@ public partial class MainWindow : Window
         Close();
     }
 
-    private void Minimize_Click(object sender, RoutedEventArgs e)
+    private void Hyperlink_RequestNavigate(object sender, RequestNavigateEventArgs e)
     {
-        WindowState = WindowState.Minimized;
+        Process.Start(new ProcessStartInfo(e.Uri.AbsoluteUri) { UseShellExecute = true });
+        e.Handled = true;
     }
 }

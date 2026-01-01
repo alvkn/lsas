@@ -4,7 +4,7 @@ public static class AppDataHelper
 {
     private static string? _appDataPath;
 
-    private static string GetAppDataPath()
+    public static string GetAppDataPath()
     {
         if (_appDataPath != null)
         {

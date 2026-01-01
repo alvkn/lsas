@@ -7,33 +7,39 @@ namespace LightSteamAccountSwitcher.Core.Services;
 public class VacStatusCache
 {
     private const string CacheFileName = "vac_cache.json";
+    private readonly string _cacheFileName = Path.Combine(AppDataHelper.GetCachePath(), CacheFileName);
 
-    public List<SteamProfile> LoadCache()
+    private List<SteamProfile> _cache = [];
+
+    public VacStatusCache()
     {
-        var path = Path.Combine(AppDataHelper.GetCachePath(), CacheFileName);
-        if (!File.Exists(path))
+        LoadCache();
+    }
+
+    public void LoadCache()
+    {
+        if (!File.Exists(_cacheFileName))
         {
-            return [];
+            return;
         }
 
         try
         {
-            var json = File.ReadAllText(path);
-            return JsonSerializer.Deserialize<List<SteamProfile>>(json) ?? [];
+            var json = File.ReadAllText(_cacheFileName);
+            _cache = JsonSerializer.Deserialize<List<SteamProfile>>(json) ?? [];
         }
         catch
         {
-            return [];
+            //
         }
     }
 
-    private static void SaveCache(IEnumerable<SteamProfile> profiles)
+    private void Save(IEnumerable<SteamProfile> profiles)
     {
-        var path = Path.Combine(AppDataHelper.GetCachePath(), CacheFileName);
         try
         {
             var json = JsonSerializer.Serialize(profiles.ToList(), JsonOptions.Default);
-            File.WriteAllText(path, json);
+            File.WriteAllText(_cacheFileName, json);
         }
         catch (Exception ex)
         {
@@ -41,10 +47,9 @@ public class VacStatusCache
         }
     }
 
-    public void UpdateCache(string steamId, bool vac, bool limited)
+    public void Update(string steamId, bool vac, bool limited)
     {
-        var cache = LoadCache();
-        var existing = cache.FirstOrDefault(x => x.SteamId64 == steamId);
+        var existing = _cache.FirstOrDefault(x => x.SteamId64 == steamId);
 
         if (existing != null)
         {
@@ -54,7 +59,7 @@ public class VacStatusCache
         }
         else
         {
-            cache.Add(new SteamProfile
+            _cache.Add(new SteamProfile
             {
                 SteamId64 = steamId,
                 VacBanned = vac,
@@ -63,6 +68,22 @@ public class VacStatusCache
             });
         }
 
-        SaveCache(cache);
+        Save(_cache);
+    }
+
+    public SteamProfile? Get(string steamId64)
+    {
+        return _cache.FirstOrDefault(x => x.SteamId64 == steamId64);
+    }
+
+    public bool IsCacheValid(string steamId)
+    {
+        var profile = _cache.FirstOrDefault(x => x.SteamId64 == steamId);
+        return profile != null && DateTime.Now - profile.LastUpdated < TimeSpan.FromDays(1);
+    }
+
+    public void ClearCache()
+    {
+        File.Delete(_cacheFileName);
     }
 }
