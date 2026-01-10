@@ -2,12 +2,14 @@ name: Build and Release
 
 on:
   push:
-    tags:
-      - 'v*'
+    branches: [ "main" ]
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
-  build:
+  release:
     runs-on: windows-latest
 
     steps:
@@ -19,47 +21,80 @@ jobs:
     - name: Setup .NET
       uses: actions/setup-dotnet@v4
       with:
-        dotnet-version: '10.0.x' 
+        dotnet-version: '10.0.x'
         dotnet-quality: 'preview'
 
+    - name: Get Version
+      id: get_version
+      shell: pwsh
+      run: |
+        $path = "src/LightSteamAccountSwitcher/LightSteamAccountSwitcher.csproj"
+        [xml]$xml = Get-Content $path
+        # Prioritize Version, then AssemblyVersion, then 1.0.0
+        $ver = $xml.Project.PropertyGroup.Version
+        if ([string]::IsNullOrWhiteSpace($ver)) { $ver = $xml.Project.PropertyGroup.AssemblyVersion }
+        if ([string]::IsNullOrWhiteSpace($ver)) { $ver = "1.0.0" }
+        
+        echo "Detected Version: $ver"
+        echo "version=$ver" >> $env:GITHUB_OUTPUT
+
+    - name: Check and Tag
+      id: tag_check
+      shell: bash
+      env:
+        VERSION: ${{ steps.get_version.outputs.version }}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        TAG="v$VERSION"
+        if git rev-parse "$TAG" >/dev/null 2>&1; then
+          echo "Tag $TAG already exists. Skipping release."
+          echo "new_tag=false" >> "$GITHUB_OUTPUT"
+        else
+          echo "Tag $TAG does not exist. Creating..."
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git tag "$TAG"
+          git push origin "$TAG"
+          echo "new_tag=true" >> "$GITHUB_OUTPUT"
+        fi
+
     - name: Restore dependencies
+      if: steps.tag_check.outputs.new_tag == 'true'
       run: dotnet restore LightSteamAccountSwitcher.slnx
 
-    - name: Build
-      run: dotnet build LightSteamAccountSwitcher.slnx --configuration Release --no-restore
-
     - name: Publish
+      if: steps.tag_check.outputs.new_tag == 'true'
       run: |
-        dotnet publish src/LightSteamAccountSwitcher/LightSteamAccountSwitcher.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -o ./publish
+        dotnet publish src/LightSteamAccountSwitcher/LightSteamAccountSwitcher.csproj -c Release -r win-x64 -p:DebugType=None -o ./publish
 
     - name: Generate Changelog
+      if: steps.tag_check.outputs.new_tag == 'true'
       id: changelog
       shell: bash
       run: |
-        # Get the previous tag
-        PREV_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")
+        TAG="v${{ steps.get_version.outputs.version }}"
+        # Find the tag before the current one
+        PREV_TAG=$(git describe --tags --abbrev=0 "${TAG}^" 2>/dev/null || echo "")
         
         if [ -z "$PREV_TAG" ]; then
-          echo "No previous tag found. Summarizing all commits."
-          SUMMARY=$(git log --pretty=format:"- %s (%h)" --no-merges)
+          echo "No previous tag found. Summarizing all commits up to $TAG."
+          SUMMARY=$(git log --pretty=format:"- %s (%h)" --no-merges "$TAG")
         else
-          echo "Summarizing commits since $PREV_TAG"
-          SUMMARY=$(git log $PREV_TAG..HEAD --pretty=format:"- %s (%h)" --no-merges)
+          echo "Summarizing commits between $PREV_TAG and $TAG"
+          SUMMARY=$(git log "$PREV_TAG..$TAG" --pretty=format:"- %s (%h)" --no-merges)
         fi
         
-        {
-          echo "summary<<EOF"
-          echo "$SUMMARY"
-          echo "EOF"
-        } >> "$GITHUB_OUTPUT"
+        echo "summary<<EOF" >> "$GITHUB_OUTPUT"
+        echo "$SUMMARY" >> "$GITHUB_OUTPUT"
+        echo "EOF" >> "$GITHUB_OUTPUT"
 
     - name: Create Release
-      uses: softprops/action-gh-release@v1
+      if: steps.tag_check.outputs.new_tag == 'true'
+      uses: softprops/action-gh-release@v2
       with:
-        files: |
-          ./publish/LightSteamAccountSwitcher.exe
-          ./publish/*.dll
-          ./publish/*.json
+        tag_name: v${{ steps.get_version.outputs.version }}
+        name: Release v${{ steps.get_version.outputs.version }}
+        files: ./publish/LightSteamAccountSwitcher.exe
         body: |
           ## Changes
           ${{ steps.changelog.outputs.summary }}

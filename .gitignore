@@ -213,15 +213,14 @@ FodyWeavers.xsd
 *.msix
 *.msm
 *.msp
-*.sln.iml
-coverage*[.json, .xml, .info]
-!.idea
-cmake-build-*/
+# JetBrains
+.idea/
 *.iws
-out/
-.idea_modules/
+*.iml
+*.sln.iml
 atlassian-ide-plugin.xml
-com_crashlytics_export_strings.xml
-crashlytics.properties
-crashlytics-build.properties
-fabric.properties
+
+# User-specific files
+*.rsuser
+*.suo
+*.user
