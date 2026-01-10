@@ -3,11 +3,11 @@ namespace LightSteamAccountSwitcher.Core.Models;
 public class SteamAccount
 {
     // From loginusers.vdf
-    public string SteamId64 { get; set; }
+    public required string SteamId64 { get; set; }
 
-    public string AccountName { get; set; }
+    public required string AccountName { get; set; }
 
-    public string PersonaName { get; set; }
+    public required string PersonaName { get; set; }
 
     public DateTime LastLogin { get; set; } // We might need to handle parsing this from string/long
 
@@ -20,7 +20,7 @@ public class SteamAccount
     public bool RememberPassword { get; set; }
 
     // From Profile XML / Cache
-    public string AvatarUrl { get; set; }
+    public required string AvatarUrl { get; set; }
 
     public bool IsVacBanned { get; set; }
 

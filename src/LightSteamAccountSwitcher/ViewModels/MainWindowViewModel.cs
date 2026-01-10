@@ -186,11 +186,7 @@ public partial class MainWindowViewModel : ObservableObject
 
         try
         {
-            var steamPath = SettingsService.Settings.SteamPath;
-            if (string.IsNullOrEmpty(steamPath))
-            {
-                steamPath = SteamRegistryHelper.GetSteamPath();
-            }
+            var steamPath = SteamRegistryHelper.GetSteamPath();
 
             if (string.IsNullOrEmpty(steamPath))
             {

@@ -1,4 +1,5 @@
 using System.Windows;
+using LightSteamAccountSwitcher.Core.Services;
 using LightSteamAccountSwitcher.Steam;
 
 namespace LightSteamAccountSwitcher;
@@ -8,6 +9,8 @@ public partial class App : Application
     protected override void OnStartup(StartupEventArgs e)
     {
         base.OnStartup(e);
+
+        SettingsService.Load();
 
         // Argument parsing
         for (var i = 0; i < e.Args.Length; i++)

@@ -23,9 +23,6 @@ public partial class SteamAccountViewModel : ObservableObject
     public bool WantsOfflineMode => Model.WantsOfflineMode;
 
     [ObservableProperty]
-    private string? _avatarUrl;
-
-    [ObservableProperty]
     private ImageSource? _avatarSource;
 
     [ObservableProperty]
@@ -39,7 +36,6 @@ public partial class SteamAccountViewModel : ObservableObject
 
     public void RefreshFromModel()
     {
-        AvatarUrl = Model.AvatarUrl;
         AvatarSource = LoadImage(Model.AvatarUrl);
         IsVacBanned = Model.IsVacBanned;
         IsLimited = Model.IsLimited;
