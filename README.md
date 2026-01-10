@@ -1,5 +1,9 @@
 # LightSteamAccountSwitcher (LSAS) <img src="assets/lsas-logo.png" width="48" height="48" valign="middle">
 
+![Build Status](https://img.shields.io/github/actions/workflow/status/alvkn/lsas/build-release.yml?branch=main&style=flat-square)
+![Latest Release](https://img.shields.io/github/v/release/alvkn/lsas?style=flat-square&color=black)
+![Downloads](https://img.shields.io/github/downloads/alvkn/lsas/total?style=flat-square&color=black)
+
 LightSteamAccountSwitcher is a lightweight, native Windows application built with .NET and WPF (MVVM) for fast switching between Steam accounts.
 
 ## Project Goal
