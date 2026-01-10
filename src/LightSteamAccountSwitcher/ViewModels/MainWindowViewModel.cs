@@ -82,7 +82,8 @@ public partial class MainWindowViewModel : ObservableObject
     [RelayCommand]
     private void OpenAbout()
     {
-        var aboutWindow = new AboutWindow();
+        var aboutViewModel = new AboutViewModel();
+        var aboutWindow = new AboutWindow(aboutViewModel);
         aboutWindow.Owner = Application.Current.MainWindow;
         aboutWindow.ShowDialog();
     }

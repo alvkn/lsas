@@ -20,7 +20,10 @@
             <Grid Grid.Row="0" Background="Transparent" MouseDown="Header_MouseDown">
                 <TextBlock Text="About" FontWeight="Bold" FontSize="14" Foreground="White"
                            VerticalAlignment="Center" HorizontalAlignment="Center" />
-                <Button Content="r" Click="Close_Click" FontFamily="Marlett"
+                <Button Content="r"
+                        Command="{Binding CloseWindowCommand}"
+                        CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}"
+                        FontFamily="Marlett"
                         HorizontalAlignment="Right" Width="30" Height="30" Margin="0,0,5,0"
                         Background="Transparent" BorderThickness="0" Foreground="#888">
                     <Button.Template>
@@ -42,12 +45,12 @@
             <!-- Content -->
             <StackPanel Grid.Row="1" Margin="20">
                 <TextBlock Text="Light Steam Account Switcher" FontSize="18" FontWeight="Bold" Foreground="White" />
-                <TextBlock Text="Version 1.0.0" FontSize="12" Foreground="#888" Margin="0,0,0,15" />
+                <TextBlock Text="{Binding Version}" FontSize="12" Foreground="#888" Margin="0,0,0,15" />
 
                 <TextBlock Text="Author: alvkn" Foreground="#DDD" Margin="0,0,0,5" />
 
                 <TextBlock Margin="0,0,0,5">
-                    <Hyperlink NavigateUri="https://github.com/alvkn/lsas" RequestNavigate="Hyperlink_RequestNavigate"
+                    <Hyperlink Command="{Binding OpenUrlCommand}" CommandParameter="https://github.com/alvkn/lsas"
                                Foreground="#66C0F4">
                         GitHub Repository
                     </Hyperlink>
@@ -56,8 +59,9 @@
                 <TextBlock Text="Based on TcNo Account Switcher" Foreground="#888" Margin="0,15,0,2" FontSize="11" />
                 <TextBlock Text="Original Author: TroubleChute" Foreground="#888" Margin="0,0,0,2" FontSize="11" />
                 <TextBlock FontSize="11">
-                    <Hyperlink NavigateUri="https://github.com/TCNOco/TcNo-Acc-Switcher"
-                               RequestNavigate="Hyperlink_RequestNavigate" Foreground="#5588AA">
+                    <Hyperlink Command="{Binding OpenUrlCommand}"
+                               CommandParameter="https://github.com/TCNOco/TcNo-Acc-Switcher"
+                               Foreground="#5588AA">
                         Original Repository
                     </Hyperlink>
                 </TextBlock>
