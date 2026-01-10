@@ -183,6 +183,7 @@
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
 
                 <!-- Logo/Title -->
@@ -192,8 +193,23 @@
                                VerticalAlignment="Bottom" Margin="0,0,0,3" />
                 </StackPanel>
 
+                <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" Margin="20,0,0,0">
+                    <TextBlock Text="New version available!"
+                               Foreground="#FF5555"
+                               FontSize="13"
+                               VerticalAlignment="Bottom"
+                               Margin="0,0,10,0"
+                               TextDecorations="Underline"
+                               Cursor="Hand"
+                               Visibility="{Binding IsUpdateAvailable, Converter={StaticResource BooleanToVisibilityConverter}}">
+                        <TextBlock.InputBindings>
+                            <MouseBinding Gesture="LeftClick" Command="{Binding OpenUpdateUrlCommand}" />
+                        </TextBlock.InputBindings>
+                    </TextBlock>
+                </StackPanel>
+
                 <!-- Actions & Window Controls -->
-                <StackPanel Grid.Column="1" Orientation="Horizontal" Margin="0,0,10,0">
+                <StackPanel Grid.Column="2" Orientation="Horizontal" Margin="0,0,10,0">
                     <Button Content="🛈" Command="{Binding OpenAboutCommand}"
                             ToolTip="About"
                             Margin="0,0,10,0" Style="{StaticResource WindowBtn}" />

@@ -30,9 +30,22 @@ jobs:
       run: |
         $path = "src/LightSteamAccountSwitcher/LightSteamAccountSwitcher.csproj"
         [xml]$xml = Get-Content $path
-        # Prioritize Version, then AssemblyVersion, then 1.0.0
-        $ver = $xml.Project.PropertyGroup.Version
-        if ([string]::IsNullOrWhiteSpace($ver)) { $ver = $xml.Project.PropertyGroup.AssemblyVersion }
+        # Prioritize AssemblyVersion
+        $ver = $xml.Project.PropertyGroup.AssemblyVersion
+        
+        if (-not [string]::IsNullOrWhiteSpace($ver)) {
+            # Try to parse as Version object
+            try {
+                $v = [version]$ver
+                # If we have 4 components (Major.Minor.Build.Revision), take only top 3
+                if ($v.Revision -ne -1) {
+                    $ver = "$($v.Major).$($v.Minor).$($v.Build)"
+                }
+            } catch {
+                Write-Host "Could not parse version '$ver' as a standard version object. Using raw string."
+            }
+        }
+        
         if ([string]::IsNullOrWhiteSpace($ver)) { $ver = "1.0.0" }
         
         echo "Detected Version: $ver"

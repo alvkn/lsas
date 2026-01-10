@@ -1,6 +1,7 @@
 using System.IO;
 using System.Net.Http;
 using LightSteamAccountSwitcher.Core;
+using LightSteamAccountSwitcher.Core.Services;
 
 namespace LightSteamAccountSwitcher.Steam;
 
@@ -15,7 +16,7 @@ public class ImageCache
 
     public static string? GetCachedAvatarPath(string steamId)
     {
-        var cacheDir = AppDataHelper.GetCachePath("Avatars");
+        var cacheDir = AppDataService.GetCachePath("Avatars");
         var path = Path.Combine(cacheDir, $"{steamId}.jpg");
         if (File.Exists(path))
         {
@@ -27,7 +28,7 @@ public class ImageCache
 
     public static string? GetCachedIconPath(string steamId)
     {
-        var cacheDir = AppDataHelper.GetCachePath("Avatars");
+        var cacheDir = AppDataService.GetCachePath("Avatars");
         var path = Path.Combine(cacheDir, $"{steamId}.ico");
 
         return File.Exists(path) ? path : null;
@@ -59,7 +60,7 @@ public class ImageCache
             return null;
         }
 
-        var cacheDir = AppDataHelper.GetCachePath("Avatars");
+        var cacheDir = AppDataService.GetCachePath("Avatars");
         var path = Path.Combine(cacheDir, $"{steamId}.jpg");
 
         try
@@ -82,7 +83,7 @@ public class ImageCache
 
     public void ClearCache()
     {
-        var cacheDir = AppDataHelper.GetCachePath("Avatars");
+        var cacheDir = AppDataService.GetCachePath("Avatars");
         if (!Directory.Exists(cacheDir))
         {
             return;

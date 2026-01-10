@@ -2,6 +2,7 @@ using System.IO;
 using System.Text.Json;
 using LightSteamAccountSwitcher.Core;
 using LightSteamAccountSwitcher.Core.Models;
+using LightSteamAccountSwitcher.Core.Services;
 using LightSteamAccountSwitcher.Core.Utils;
 
 namespace LightSteamAccountSwitcher.Steam;
@@ -9,7 +10,7 @@ namespace LightSteamAccountSwitcher.Steam;
 public class VacStatusCache
 {
     private const string CacheFileName = "vac_cache.json";
-    private readonly string _cacheFileName = Path.Combine(AppDataHelper.GetCachePath(), CacheFileName);
+    private readonly string _cacheFileName = Path.Combine(AppDataService.GetCachePath(), CacheFileName);
 
     private List<SteamProfile> _cache = [];
     private bool _isLoaded;

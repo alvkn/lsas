@@ -1,10 +1,11 @@
 using System.Diagnostics;
+using LightSteamAccountSwitcher.Core.Services;
 
 namespace LightSteamAccountSwitcher.Core;
 
 public static class Logger
 {
-    private static readonly string LogPath = Path.Combine(AppDataHelper.GetAppDataPath(), "app.log");
+    private static readonly string LogPath = Path.Combine(AppDataService.GetAppDataPath(), "app.log");
     private static readonly Lock Lock = new();
 
     public static void Info(string message)

@@ -2,7 +2,7 @@ using System.IO;
 using System.Windows;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using LightSteamAccountSwitcher.Core;
+using LightSteamAccountSwitcher.Core.Services;
 using LightSteamAccountSwitcher.Steam;
 
 namespace LightSteamAccountSwitcher.ViewModels;
@@ -17,9 +17,9 @@ public partial class SettingsViewModel : ObservableObject
     public SettingsViewModel(SteamService steamService)
     {
         _steamService = steamService;
-        SettingsHelper.Load();
+        SettingsService.Load();
 
-        AutoClose = SettingsHelper.Settings.AutoClose;
+        AutoClose = SettingsService.Settings.AutoClose;
     }
 
     public SettingsViewModel() : this(new SteamService()) { }
@@ -27,8 +27,8 @@ public partial class SettingsViewModel : ObservableObject
     [RelayCommand]
     private void Save()
     {
-        SettingsHelper.Settings.AutoClose = AutoClose;
-        SettingsHelper.Save();
+        SettingsService.Settings.AutoClose = AutoClose;
+        SettingsService.Save();
     }
 
     [RelayCommand]
@@ -61,7 +61,7 @@ public partial class SettingsViewModel : ObservableObject
 
         try
         {
-            var appData = AppDataHelper.GetAppDataPath();
+            var appData = AppDataService.GetAppDataPath();
             if (Directory.Exists(appData))
             {
                 Directory.Delete(appData, true);

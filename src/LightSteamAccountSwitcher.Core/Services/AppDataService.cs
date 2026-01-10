@@ -1,6 +1,6 @@
-namespace LightSteamAccountSwitcher.Core;
+namespace LightSteamAccountSwitcher.Core.Services;
 
-public static class AppDataHelper
+public static class AppDataService
 {
     private static string? _appDataPath;
 

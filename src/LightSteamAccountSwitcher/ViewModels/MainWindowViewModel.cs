@@ -1,10 +1,11 @@
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
+using System.Reflection;
 using System.Windows;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using LightSteamAccountSwitcher.Core;
+using LightSteamAccountSwitcher.Core.Services;
 using LightSteamAccountSwitcher.Steam;
 using LightSteamAccountSwitcher.Windows;
 
@@ -26,12 +27,20 @@ public partial class MainWindowViewModel : ObservableObject
     [ObservableProperty]
     private string _statusMessage = "Ready";
 
+    [ObservableProperty]
+    private bool _isUpdateAvailable;
+
+    [ObservableProperty]
+    private string _updateUrl = string.Empty;
+
     [RelayCommand]
     public async Task LoadAccounts()
     {
         IsLoading = true;
         StatusMessage = "Loading accounts...";
         Accounts.Clear();
+
+        _ = CheckForUpdates();
 
         try
         {
@@ -128,7 +137,7 @@ public partial class MainWindowViewModel : ObservableObject
             Accounts.FirstOrDefault(acc => acc.IsActive)?.IsActive = false;
             accountVm.IsActive = true;
 
-            if (SettingsHelper.Settings.AutoClose)
+            if (SettingsService.Settings.AutoClose)
             {
                 Application.Current.Shutdown();
             }
@@ -164,7 +173,7 @@ public partial class MainWindowViewModel : ObservableObject
     }
 
     [RelayCommand]
-    public void ForgetAccount(SteamAccountViewModel? accountVm)
+    private void ForgetAccount(SteamAccountViewModel? accountVm)
     {
         if (accountVm == null)
         {
@@ -232,8 +241,7 @@ public partial class MainWindowViewModel : ObservableObject
             var iconPath = SteamService.GetCachedIconPath(accountVm.Model.SteamId64);
             if (iconPath == null)
             {
-                // Try to create icon from avatar
-                var avatarPath = Path.Combine(AppDataHelper.GetCachePath("Avatars"),
+                var avatarPath = Path.Combine(AppDataService.GetCachePath("Avatars"),
                     $"{accountVm.Model.SteamId64}.jpg");
                 if (File.Exists(avatarPath))
                 {
@@ -309,5 +317,46 @@ public partial class MainWindowViewModel : ObservableObject
 
         Clipboard.SetText($"https://steamcommunity.com/profiles/{accountVm.Model.SteamId64}");
         StatusMessage = "Copied profile link";
+    }
+
+    [RelayCommand]
+    private void OpenUpdateUrl()
+    {
+        if (!string.IsNullOrEmpty(UpdateUrl))
+        {
+            try
+            {
+                Process.Start(new ProcessStartInfo(UpdateUrl) { UseShellExecute = true });
+            }
+            catch (Exception ex)
+            {
+                StatusMessage = $"Error opening URL: {ex.Message}";
+            }
+        }
+    }
+
+    private async Task CheckForUpdates()
+    {
+        await Task.Yield();
+
+        try
+        {
+            var version = Assembly.GetEntryAssembly()?.GetName().Version?.ToString();
+            if (version == null)
+            {
+                return;
+            }
+
+            var info = await UpdateService.CheckForUpdateAsync(version);
+            if (info.IsAvailable)
+            {
+                UpdateUrl = info.ReleaseUrl;
+                IsUpdateAvailable = true;
+            }
+        }
+        catch
+        {
+            // Fail silently
+        }
     }
 }

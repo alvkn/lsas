@@ -1,5 +1,5 @@
 using System.Windows;
-using LightSteamAccountSwitcher.Core;
+using LightSteamAccountSwitcher.Core.Services;
 using LightSteamAccountSwitcher.Steam;
 
 namespace LightSteamAccountSwitcher;
@@ -10,7 +10,7 @@ public partial class App : Application
     {
         base.OnStartup(e);
 
-        SettingsHelper.Load();
+        SettingsService.Load();
 
         // Argument parsing
         for (var i = 0; i < e.Args.Length; i++)
