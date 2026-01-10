@@ -27,7 +27,7 @@ public static class SettingsService
         try
         {
             var json = File.ReadAllText(SettingsPath);
-            Settings = JsonSerializer.Deserialize<AppSettings>(json) ?? new AppSettings();
+            Settings = JsonSerializer.Deserialize(json, AppJsonContext.Default.AppSettings) ?? new AppSettings();
 
             if (Settings.Version < CurrentVersion)
             {
@@ -46,7 +46,7 @@ public static class SettingsService
     {
         try
         {
-            var json = JsonSerializer.Serialize(Settings, JsonOptions.Default);
+            var json = JsonSerializer.Serialize(Settings, AppJsonContext.Default.AppSettings);
             File.WriteAllText(SettingsPath, json);
         }
         catch

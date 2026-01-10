@@ -10,10 +10,17 @@ public class VacStatusCache
     private readonly string _cacheFileName = Path.Combine(AppDataHelper.GetCachePath(), CacheFileName);
 
     private List<SteamProfile> _cache = [];
+    private bool _isLoaded;
 
     public VacStatusCache()
     {
+    }
+
+    private void EnsureLoaded()
+    {
+        if (_isLoaded) return;
         LoadCache();
+        _isLoaded = true;
     }
 
     public void LoadCache()
@@ -26,7 +33,7 @@ public class VacStatusCache
         try
         {
             var json = File.ReadAllText(_cacheFileName);
-            _cache = JsonSerializer.Deserialize<List<SteamProfile>>(json) ?? [];
+            _cache = JsonSerializer.Deserialize(json, AppJsonContext.Default.ListSteamProfile) ?? [];
         }
         catch
         {
@@ -38,7 +45,7 @@ public class VacStatusCache
     {
         try
         {
-            var json = JsonSerializer.Serialize(profiles.ToList(), JsonOptions.Default);
+            var json = JsonSerializer.Serialize(profiles.ToList(), AppJsonContext.Default.ListSteamProfile);
             File.WriteAllText(_cacheFileName, json);
         }
         catch (Exception ex)
@@ -49,6 +56,7 @@ public class VacStatusCache
 
     public void Update(string steamId, bool vac, bool limited)
     {
+        EnsureLoaded();
         var existing = _cache.FirstOrDefault(x => x.SteamId64 == steamId);
 
         if (existing != null)
@@ -73,11 +81,13 @@ public class VacStatusCache
 
     public SteamProfile? Get(string steamId64)
     {
+        EnsureLoaded();
         return _cache.FirstOrDefault(x => x.SteamId64 == steamId64);
     }
 
     public bool IsCacheValid(string steamId)
     {
+        EnsureLoaded();
         var profile = _cache.FirstOrDefault(x => x.SteamId64 == steamId);
         return profile != null && DateTime.Now - profile.LastUpdated < TimeSpan.FromDays(1);
     }
@@ -85,5 +95,7 @@ public class VacStatusCache
     public void ClearCache()
     {
         File.Delete(_cacheFileName);
+        _cache.Clear();
+        _isLoaded = true;
     }
 }
