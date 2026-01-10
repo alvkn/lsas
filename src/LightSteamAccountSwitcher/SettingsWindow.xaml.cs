@@ -15,7 +15,9 @@ public partial class SettingsWindow : Window
     private void Header_MouseDown(object sender, MouseButtonEventArgs e)
     {
         if (e.ChangedButton == MouseButton.Left)
-            this.DragMove();
+        {
+            DragMove();
+        }
     }
 
     private void Close_Click(object sender, RoutedEventArgs e)

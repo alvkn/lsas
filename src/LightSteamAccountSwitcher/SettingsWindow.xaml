@@ -13,27 +13,27 @@
     <Border Background="#0A0A0A" CornerRadius="8" BorderBrush="#333333" BorderThickness="1">
         <Grid>
             <Grid.RowDefinitions>
-                <RowDefinition Height="40"/>
-                <RowDefinition Height="*"/>
-                <RowDefinition Height="60"/>
+                <RowDefinition Height="40" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="60" />
             </Grid.RowDefinitions>
 
             <!-- Header -->
             <Grid Grid.Row="0" Background="Transparent" MouseDown="Header_MouseDown">
                 <TextBlock Text="Settings" FontWeight="Bold" FontSize="14" Foreground="White"
-                           VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                           VerticalAlignment="Center" HorizontalAlignment="Center" />
                 <Button Content="r" Click="Close_Click" FontFamily="Marlett"
                         HorizontalAlignment="Right" Width="30" Height="30" Margin="0,0,5,0"
                         Background="Transparent" BorderThickness="0" Foreground="#888">
                     <Button.Template>
                         <ControlTemplate TargetType="Button">
                             <Border Background="{TemplateBinding Background}" CornerRadius="4">
-                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
                             </Border>
                             <ControlTemplate.Triggers>
                                 <Trigger Property="IsMouseOver" Value="True">
-                                    <Setter Property="Background" Value="#C42B1C"/>
-                                    <Setter Property="Foreground" Value="White"/>
+                                    <Setter Property="Background" Value="#C42B1C" />
+                                    <Setter Property="Foreground" Value="White" />
                                 </Trigger>
                             </ControlTemplate.Triggers>
                         </ControlTemplate>
@@ -46,7 +46,7 @@
                 <CheckBox Content="Auto-close after switch" IsChecked="{Binding AutoClose}"
                           Foreground="White" Margin="0,0,0,20">
                     <CheckBox.LayoutTransform>
-                        <ScaleTransform ScaleX="1.2" ScaleY="1.2"/>
+                        <ScaleTransform ScaleX="1.2" ScaleY="1.2" />
                     </CheckBox.LayoutTransform>
                     <CheckBox.Template>
                         <ControlTemplate TargetType="CheckBox">
@@ -55,18 +55,20 @@
                                         Background="#161616" BorderBrush="#333" BorderThickness="1"
                                         VerticalAlignment="Center" Margin="0,0,10,0">
                                     <Grid>
-                                        <Path x:Name="checkMark" Data="M 1,8 L 5.5,12 L 14,4" Stroke="White" StrokeThickness="2"
-                                              Visibility="Collapsed" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                        <Path x:Name="checkMark" Data="M 1,8 L 5.5,12 L 14,4" Stroke="White"
+                                              StrokeThickness="2"
+                                              Visibility="Collapsed" HorizontalAlignment="Center"
+                                              VerticalAlignment="Center" />
                                     </Grid>
                                 </Border>
-                                <ContentPresenter VerticalAlignment="Center"/>
+                                <ContentPresenter VerticalAlignment="Center" />
                             </StackPanel>
                             <ControlTemplate.Triggers>
                                 <Trigger Property="IsMouseOver" Value="True">
-                                    <Setter TargetName="checkBoxBorder" Property="BorderBrush" Value="#666"/>
+                                    <Setter TargetName="checkBoxBorder" Property="BorderBrush" Value="#666" />
                                 </Trigger>
                                 <Trigger Property="IsChecked" Value="True">
-                                    <Setter TargetName="checkMark" Property="Visibility" Value="Visible"/>
+                                    <Setter TargetName="checkMark" Property="Visibility" Value="Visible" />
                                 </Trigger>
                             </ControlTemplate.Triggers>
                         </ControlTemplate>
@@ -80,11 +82,12 @@
                         <Button.Template>
                             <ControlTemplate TargetType="Button">
                                 <Border x:Name="border" Background="{TemplateBinding Background}" CornerRadius="4">
-                                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" Margin="{TemplateBinding Padding}"/>
+                                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                      Margin="{TemplateBinding Padding}" />
                                 </Border>
                                 <ControlTemplate.Triggers>
                                     <Trigger Property="IsMouseOver" Value="True">
-                                        <Setter TargetName="border" Property="Background" Value="#333"/>
+                                        <Setter TargetName="border" Property="Background" Value="#333" />
                                     </Trigger>
                                 </ControlTemplate.Triggers>
                             </ControlTemplate>
@@ -96,11 +99,12 @@
                         <Button.Template>
                             <ControlTemplate TargetType="Button">
                                 <Border x:Name="border" Background="{TemplateBinding Background}" CornerRadius="4">
-                                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" Margin="{TemplateBinding Padding}"/>
+                                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                      Margin="{TemplateBinding Padding}" />
                                 </Border>
                                 <ControlTemplate.Triggers>
                                     <Trigger Property="IsMouseOver" Value="True">
-                                        <Setter TargetName="border" Property="Background" Value="#551111"/>
+                                        <Setter TargetName="border" Property="Background" Value="#551111" />
                                     </Trigger>
                                 </ControlTemplate.Triggers>
                             </ControlTemplate>
@@ -110,18 +114,20 @@
             </StackPanel>
 
             <!-- Footer -->
-            <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,0,20,0" VerticalAlignment="Center">
+            <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,0,20,0"
+                        VerticalAlignment="Center">
                 <Button Content="Save" Command="{Binding SaveCommand}" Click="Close_Click"
                         Background="White" Foreground="Black" BorderThickness="0"
                         Padding="30,6" FontWeight="SemiBold" Cursor="Hand" VerticalAlignment="Center">
                     <Button.Template>
                         <ControlTemplate TargetType="Button">
-                            <Border x:Name="Border" Background="{TemplateBinding Background}" CornerRadius="4" Padding="{TemplateBinding Padding}">
-                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            <Border x:Name="Border" Background="{TemplateBinding Background}" CornerRadius="4"
+                                    Padding="{TemplateBinding Padding}">
+                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
                             </Border>
                             <ControlTemplate.Triggers>
                                 <Trigger Property="IsMouseOver" Value="True">
-                                    <Setter TargetName="Border" Property="Background" Value="#DDDDDD"/>
+                                    <Setter TargetName="Border" Property="Background" Value="#DDDDDD" />
                                 </Trigger>
                             </ControlTemplate.Triggers>
                         </ControlTemplate>

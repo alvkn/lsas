@@ -4,7 +4,7 @@ using System.IO;
 using System.Windows;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using LightSteamAccountSwitcher.Core.Services;
+using LightSteamAccountSwitcher.Core;
 using LightSteamAccountSwitcher.Steam;
 using LightSteamAccountSwitcher.Windows;
 
@@ -128,7 +128,7 @@ public partial class MainWindowViewModel : ObservableObject
             Accounts.FirstOrDefault(acc => acc.IsActive)?.IsActive = false;
             accountVm.IsActive = true;
 
-            if (SettingsService.Settings.AutoClose)
+            if (SettingsHelper.Settings.AutoClose)
             {
                 Application.Current.Shutdown();
             }

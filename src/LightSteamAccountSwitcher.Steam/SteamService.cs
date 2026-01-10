@@ -1,12 +1,11 @@
 using System.IO;
 using System.Net.Http;
-using System.Text;
 using System.Xml.Linq;
-using Gameloop.Vdf;
-using Gameloop.Vdf.Linq;
+using LightSteamAccountSwitcher.Core;
 using LightSteamAccountSwitcher.Core.Models;
-using LightSteamAccountSwitcher.Core.Services;
 using LightSteamAccountSwitcher.Windows;
+using VdfSerializer;
+using VdfSerializer.Linq;
 
 namespace LightSteamAccountSwitcher.Steam;
 
@@ -29,12 +28,7 @@ public class SteamService
     private static string? GetLoginUsersPath()
     {
         var steamPath = SteamRegistryHelper.GetSteamPath();
-        if (string.IsNullOrEmpty(steamPath))
-        {
-            return null;
-        }
-
-        return Path.Combine(steamPath, "config", "loginusers.vdf");
+        return string.IsNullOrEmpty(steamPath) ? null : Path.Combine(steamPath, "config", "loginusers.vdf");
     }
 
     public static string? GetActiveAccountName()
@@ -77,7 +71,7 @@ public class SteamService
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Error parsing loginusers.vdf: {ex.Message}");
+            Logger.Error($"Error parsing loginusers.vdf: {ex.Message}");
         }
 
         return accounts;
@@ -91,12 +85,12 @@ public class SteamService
             return null;
         }
 
-        var accountName = userDetails.Value<string>("AccountName");
-        var personaName = userDetails.Value<string>("PersonaName");
-        var timestamp = userDetails.Value<string>("Timestamp");
-        var wantsOffline = userDetails.Value<string>("WantsOfflineMode");
-        var mostRecent = userDetails.Value<string>("MostRec");
-        var remember = userDetails.Value<string>("RememberPassword");
+        var accountName = userDetails.Value<string>("AccountName")!;
+        var personaName = userDetails.Value<string>("PersonaName")!;
+        var timestamp = userDetails.Value<string>("Timestamp")!;
+        var wantsOffline = userDetails.Value<string>("WantsOfflineMode")!;
+        var mostRecent = userDetails.Value<string>("MostRec")!;
+        var remember = userDetails.Value<string>("RememberPassword")!;
 
         if (string.IsNullOrEmpty(accountName))
         {
@@ -185,7 +179,7 @@ public class SteamService
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Error fetching profile for {account.AccountName}: {ex.Message}");
+            Logger.Error($"Error fetching profile for {account.AccountName}: {ex.Message}");
         }
     }
 
@@ -237,7 +231,7 @@ public class SteamService
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Error forgetting account: {ex}");
+            Logger.Error($"Error forgetting account: {ex}");
         }
     }
 
@@ -254,44 +248,46 @@ public class SteamService
             var vdfText = File.ReadAllText(path);
             var root = VdfConvert.Deserialize(vdfText);
 
-            if (root.Value is VObject usersObj)
+            if (root.Value is not VObject usersObj)
             {
-                foreach (var userProp in usersObj)
+                return;
+            }
+
+            foreach (var userProp in usersObj)
+            {
+                if (userProp.Value is not VObject userDetails)
                 {
-                    if (userProp.Value is not VObject userDetails)
-                    {
-                        continue;
-                    }
-
-                    if (userDetails.ContainsKey("MostRec"))
-                    {
-                        userDetails["MostRec"] = new VValue("0");
-                    }
-
-                    if (userProp.Key != targetSteamId)
-                    {
-                        continue;
-                    }
-
-                    userDetails["MostRec"] = new VValue("1");
-                    userDetails["RememberPassword"] = new VValue("1");
-
-                    if (personaState == -1)
-                    {
-                        continue;
-                    }
-
-                    var wantsOffline = personaState == 0 ? "1" : "0";
-                    userDetails["WantsOfflineMode"] = new VValue(wantsOffline);
-                    userDetails["SkipOfflineModeWarning"] = new VValue(wantsOffline);
+                    continue;
                 }
+
+                if (userDetails.ContainsKey("MostRec"))
+                {
+                    userDetails["MostRec"] = new VValue("0");
+                }
+
+                if (userProp.Key != targetSteamId)
+                {
+                    continue;
+                }
+
+                userDetails["MostRec"] = new VValue("1");
+                userDetails["RememberPassword"] = new VValue("1");
+
+                if (personaState == -1)
+                {
+                    continue;
+                }
+
+                var wantsOffline = personaState == 0 ? "1" : "0";
+                userDetails["WantsOfflineMode"] = new VValue(wantsOffline);
+                userDetails["SkipOfflineModeWarning"] = new VValue(wantsOffline);
             }
 
             File.WriteAllText(path, root.ToString());
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Error patching vdf: {ex}");
+            Logger.Error($"Error patching vdf: {ex}");
         }
     }
 
@@ -319,34 +315,21 @@ public class SteamService
             }
 
             var localConfigText = File.ReadAllText(localConfigPath);
+            var root = VdfConvert.Deserialize(localConfigText);
 
-            var positionOfVar = localConfigText.IndexOf("\"ePersonaState\"", StringComparison.Ordinal);
-            if (positionOfVar == -1)
+            if (root.Value is not VObject rootObj ||
+                !rootObj.ContainsKey("friends") ||
+                rootObj["friends"] is not VObject friendsObj)
             {
                 return;
             }
 
-            var valStartQuote = localConfigText.IndexOf('"', positionOfVar + 15);
-            if (valStartQuote == -1)
-            {
-                return;
-            }
-
-            var valEndQuote = localConfigText.IndexOf('"', valStartQuote + 1);
-            if (valEndQuote == -1)
-            {
-                return;
-            }
-
-            var sb = new StringBuilder(localConfigText);
-            sb.Remove(valStartQuote + 1, valEndQuote - valStartQuote - 1);
-            sb.Insert(valStartQuote + 1, state);
-
-            File.WriteAllText(localConfigPath, sb.ToString());
+            friendsObj["ePersonaState"] = new VValue(state.ToString());
+            File.WriteAllText(localConfigPath, root.ToString());
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Error setting persona state: {ex.Message}");
+            Logger.Error($"Error setting persona state: {ex.Message}");
         }
     }
 

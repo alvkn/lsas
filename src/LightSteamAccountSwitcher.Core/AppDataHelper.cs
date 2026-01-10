@@ -1,4 +1,4 @@
-namespace LightSteamAccountSwitcher.Core.Services;
+namespace LightSteamAccountSwitcher.Core;
 
 public static class AppDataHelper
 {

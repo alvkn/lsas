@@ -1,15 +1,10 @@
 using System.Text.Json;
+using LightSteamAccountSwitcher.Core.Models;
 using LightSteamAccountSwitcher.Core.Utils;
 
-namespace LightSteamAccountSwitcher.Core.Services;
+namespace LightSteamAccountSwitcher.Core;
 
-public class AppSettings
-{
-    public int Version { get; set; } = -1;
-    public bool AutoClose { get; set; }
-}
-
-public static class SettingsService
+public static class SettingsHelper
 {
     private const int CurrentVersion = 1;
     private static readonly string SettingsPath = Path.Combine(AppDataHelper.GetAppDataPath(), "settings.json");

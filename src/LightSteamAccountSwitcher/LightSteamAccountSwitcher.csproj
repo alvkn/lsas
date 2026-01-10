@@ -27,11 +27,12 @@
 
     <ItemGroup>
         <PackageReference Include="CommunityToolkit.Mvvm" Version="8.2.2"/>
+        <PackageReference Include="VdfSerializer" Version="1.0.0"/>
     </ItemGroup>
 
     <ItemGroup>
-      <None Remove="Assets\LSAS.ico" />
-      <Resource Include="Assets\LSAS.ico" />
+        <None Remove="Assets\LSAS.ico"/>
+        <Resource Include="Assets\LSAS.ico"/>
     </ItemGroup>
 
 </Project>

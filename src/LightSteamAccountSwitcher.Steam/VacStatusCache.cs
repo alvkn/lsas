@@ -1,8 +1,10 @@
+using System.IO;
 using System.Text.Json;
+using LightSteamAccountSwitcher.Core;
 using LightSteamAccountSwitcher.Core.Models;
 using LightSteamAccountSwitcher.Core.Utils;
 
-namespace LightSteamAccountSwitcher.Core.Services;
+namespace LightSteamAccountSwitcher.Steam;
 
 public class VacStatusCache
 {
@@ -12,18 +14,18 @@ public class VacStatusCache
     private List<SteamProfile> _cache = [];
     private bool _isLoaded;
 
-    public VacStatusCache()
-    {
-    }
-
     private void EnsureLoaded()
     {
-        if (_isLoaded) return;
+        if (_isLoaded)
+        {
+            return;
+        }
+
         LoadCache();
         _isLoaded = true;
     }
 
-    public void LoadCache()
+    private void LoadCache()
     {
         if (!File.Exists(_cacheFileName))
         {
@@ -50,7 +52,7 @@ public class VacStatusCache
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Failed to save vac cache: {ex.Message}");
+            Logger.Error($"Failed to save vac cache: {ex.Message}");
         }
     }
 

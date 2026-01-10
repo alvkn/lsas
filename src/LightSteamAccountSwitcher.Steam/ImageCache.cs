@@ -1,6 +1,6 @@
 using System.IO;
 using System.Net.Http;
-using LightSteamAccountSwitcher.Core.Services;
+using LightSteamAccountSwitcher.Core;
 
 namespace LightSteamAccountSwitcher.Steam;
 
@@ -75,7 +75,7 @@ public class ImageCache
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Failed to download avatar for {steamId}: {ex.Message}");
+            Logger.Error($"Failed to download avatar for {steamId}: {ex.Message}");
             return null;
         }
     }

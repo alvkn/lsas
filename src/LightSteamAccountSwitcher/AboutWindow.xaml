@@ -12,26 +12,26 @@
     <Border Background="#0A0A0A" CornerRadius="8" BorderBrush="#333333" BorderThickness="1">
         <Grid>
             <Grid.RowDefinitions>
-                <RowDefinition Height="40"/>
-                <RowDefinition Height="*"/>
+                <RowDefinition Height="40" />
+                <RowDefinition Height="*" />
             </Grid.RowDefinitions>
 
             <!-- Header -->
             <Grid Grid.Row="0" Background="Transparent" MouseDown="Header_MouseDown">
                 <TextBlock Text="About" FontWeight="Bold" FontSize="14" Foreground="White"
-                           VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                           VerticalAlignment="Center" HorizontalAlignment="Center" />
                 <Button Content="r" Click="Close_Click" FontFamily="Marlett"
                         HorizontalAlignment="Right" Width="30" Height="30" Margin="0,0,5,0"
                         Background="Transparent" BorderThickness="0" Foreground="#888">
                     <Button.Template>
                         <ControlTemplate TargetType="Button">
                             <Border Background="{TemplateBinding Background}" CornerRadius="4">
-                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
                             </Border>
                             <ControlTemplate.Triggers>
                                 <Trigger Property="IsMouseOver" Value="True">
-                                    <Setter Property="Background" Value="#C42B1C"/>
-                                    <Setter Property="Foreground" Value="White"/>
+                                    <Setter Property="Background" Value="#C42B1C" />
+                                    <Setter Property="Foreground" Value="White" />
                                 </Trigger>
                             </ControlTemplate.Triggers>
                         </ControlTemplate>
@@ -44,10 +44,11 @@
                 <TextBlock Text="Light Steam Account Switcher" FontSize="18" FontWeight="Bold" Foreground="White" />
                 <TextBlock Text="Version 1.0.0" FontSize="12" Foreground="#888" Margin="0,0,0,15" />
 
-                <TextBlock Text="Author: alvkn" Foreground="#DDD" Margin="0,0,0,5"/>
+                <TextBlock Text="Author: alvkn" Foreground="#DDD" Margin="0,0,0,5" />
 
                 <TextBlock Margin="0,0,0,5">
-                    <Hyperlink NavigateUri="https://github.com/alvkn/lsas" RequestNavigate="Hyperlink_RequestNavigate" Foreground="#66C0F4">
+                    <Hyperlink NavigateUri="https://github.com/alvkn/lsas" RequestNavigate="Hyperlink_RequestNavigate"
+                               Foreground="#66C0F4">
                         GitHub Repository
                     </Hyperlink>
                 </TextBlock>
@@ -55,7 +56,8 @@
                 <TextBlock Text="Based on TcNo Account Switcher" Foreground="#888" Margin="0,15,0,2" FontSize="11" />
                 <TextBlock Text="Original Author: TroubleChute" Foreground="#888" Margin="0,0,0,2" FontSize="11" />
                 <TextBlock FontSize="11">
-                    <Hyperlink NavigateUri="https://github.com/TCNOco/TcNo-Acc-Switcher" RequestNavigate="Hyperlink_RequestNavigate" Foreground="#5588AA">
+                    <Hyperlink NavigateUri="https://github.com/TCNOco/TcNo-Acc-Switcher"
+                               RequestNavigate="Hyperlink_RequestNavigate" Foreground="#5588AA">
                         Original Repository
                     </Hyperlink>
                 </TextBlock>

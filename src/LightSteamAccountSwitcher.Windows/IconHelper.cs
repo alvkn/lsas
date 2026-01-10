@@ -1,6 +1,7 @@
 using System.IO;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using LightSteamAccountSwitcher.Core;
 
 namespace LightSteamAccountSwitcher.Windows;
 
@@ -47,7 +48,7 @@ public static class IconHelper
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Failed to create icon from {inputPath}: {ex.Message}");
+            Logger.Error($"Failed to create icon from {inputPath}: {ex.Message}");
         }
     }
 }

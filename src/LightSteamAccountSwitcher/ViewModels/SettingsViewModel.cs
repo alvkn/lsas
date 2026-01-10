@@ -2,7 +2,7 @@ using System.IO;
 using System.Windows;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using LightSteamAccountSwitcher.Core.Services;
+using LightSteamAccountSwitcher.Core;
 using LightSteamAccountSwitcher.Steam;
 
 namespace LightSteamAccountSwitcher.ViewModels;
@@ -17,9 +17,9 @@ public partial class SettingsViewModel : ObservableObject
     public SettingsViewModel(SteamService steamService)
     {
         _steamService = steamService;
-        SettingsService.Load();
+        SettingsHelper.Load();
 
-        AutoClose = SettingsService.Settings.AutoClose;
+        AutoClose = SettingsHelper.Settings.AutoClose;
     }
 
     public SettingsViewModel() : this(new SteamService()) { }
@@ -27,14 +27,18 @@ public partial class SettingsViewModel : ObservableObject
     [RelayCommand]
     private void Save()
     {
-        SettingsService.Settings.AutoClose = AutoClose;
-        SettingsService.Save();
+        SettingsHelper.Settings.AutoClose = AutoClose;
+        SettingsHelper.Save();
     }
 
     [RelayCommand]
     private void ClearCache()
     {
-        if (MessageBox.Show("Are you sure you want to clear all cached images and data?", "Clear Cache", MessageBoxButton.YesNo, MessageBoxImage.Warning) == MessageBoxResult.Yes)
+        if (MessageBox.Show("Are you sure you want to clear all cached images and data?",
+                "Clear Cache",
+                MessageBoxButton.YesNo,
+                MessageBoxImage.Warning) ==
+            MessageBoxResult.Yes)
         {
             _steamService.ClearCache();
             MessageBox.Show("Cache cleared.", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
@@ -62,6 +66,7 @@ public partial class SettingsViewModel : ObservableObject
             {
                 Directory.Delete(appData, true);
             }
+
             Application.Current.Shutdown();
         }
         catch (Exception ex)
