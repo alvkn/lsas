@@ -325,7 +325,7 @@ public class SteamService
             }
 
             friendsObj["ePersonaState"] = new VValue(state.ToString());
-            File.WriteAllText(localConfigPath, root.ToString());
+            File.WriteAllText(localConfigPath, VdfConvert.Serialize(root));
         }
         catch (Exception ex)
         {
